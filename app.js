@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
       spread: []   // Array of { x: Date, y: CloseSpreadPct }
     },
     currentAsset: 'binance', // 'binance', 'bcv', 'spread'
+    currentTimeframe: '1d',  // '1h', '4h', '1d'
     currentRange: '30',      // '7', '15', '30', 'all'
     showMA: false,
     periodMA: 7,
@@ -64,6 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
       Array.from(elRangeSelector.children).forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.currentRange = btn.dataset.value;
+      updateChart();
+      updateStatistics();
+    });
+
+    // Timeframe Selectors
+    const elTimeframeSelector = document.getElementById('timeframe-selector');
+    elTimeframeSelector.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      Array.from(elTimeframeSelector.children).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.currentTimeframe = btn.dataset.value;
+      processDailyData();
       updateChart();
       updateStatistics();
     });
@@ -130,31 +144,61 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Convert Hourly Records into Daily OHLC
+  // Convert Hourly Records into Daily/4H/1H OHLC
   function processDailyData() {
     const groups = {};
 
     state.rawHistory.forEach(item => {
-      // Group by local date string YYYY-MM-DD
-      const dateStr = item.timestamp.split('T')[0];
-      if (!groups[dateStr]) {
-        groups[dateStr] = [];
+      const date = new Date(item.timestamp);
+      if (isNaN(date.getTime())) return;
+
+      let groupKey = '';
+      if (state.currentTimeframe === '1d') {
+        groupKey = item.timestamp.split('T')[0];
+      } else if (state.currentTimeframe === '4h') {
+        const dateStr = item.timestamp.split('T')[0];
+        const hour = date.getHours();
+        const block = Math.floor(hour / 4) * 4;
+        groupKey = `${dateStr}_${block}h`;
+      } else {
+        // '1h'
+        const dateStr = item.timestamp.split('T')[0];
+        const hour = date.getHours();
+        groupKey = `${dateStr}_${hour}h`;
       }
-      groups[dateStr].push(item);
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = [];
+      }
+      groups[groupKey].push(item);
     });
 
-    const sortedDates = Object.keys(groups).sort();
+    const sortedGroupKeys = Object.keys(groups).sort((a, b) => a.localeCompare(b));
     
     state.dailyData.binance = [];
     state.dailyData.bcv = [];
     state.dailyData.spread = [];
 
-    sortedDates.forEach(date => {
-      const dayItems = groups[date].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-      const dateObj = new Date(date + 'T00:00:00');
+    sortedGroupKeys.forEach(key => {
+      const groupItems = groups[key].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+      
+      let dateObj;
+      if (state.currentTimeframe === '1d') {
+        dateObj = new Date(key + 'T00:00:00');
+      } else if (state.currentTimeframe === '4h') {
+        const parts = key.split('_');
+        const dateStr = parts[0];
+        const block = parseInt(parts[1]);
+        dateObj = new Date(dateStr + `T${String(block).padStart(2, '0')}:00:00`);
+      } else {
+        const parts = key.split('_');
+        const dateStr = parts[0];
+        const hour = parseInt(parts[1]);
+        dateObj = new Date(dateStr + `T${String(hour).padStart(2, '0')}:00:00`);
+      }
 
       // Binance OHLC
-      const binancePrices = dayItems.map(d => d.binance);
+      const binancePrices = groupItems.map(d => d.binance);
       const bBinance = {
         x: dateObj,
         y: [
@@ -166,7 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       // BCV OHLC
-      const bcvPrices = dayItems.map(d => d.bcv);
+      const bcvPrices = groupItems.map(d => d.bcv);
       const bBCV = {
         x: dateObj,
         y: [
@@ -240,11 +284,13 @@ document.addEventListener('DOMContentLoaded', () => {
     return ema;
   }
 
-  // Filter dataset by range
+  // Filter dataset by range (Days)
   function filterDataByRange(dataset, range) {
     if (range === 'all') return dataset;
-    const limit = parseInt(range);
-    return dataset.slice(-limit);
+    const limitDays = parseInt(range);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - limitDays);
+    return dataset.filter(item => item.x >= cutoffDate);
   }
 
   // Update Stats Section
@@ -293,15 +339,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const filteredBase = filterDataByRange(baseData, state.currentRange);
     const series = [];
 
+    const tfUpper = state.currentTimeframe.toUpperCase();
     if (isCandle) {
       series.push({
-        name: 'Velas Diarias',
+        name: `Velas ${tfUpper}`,
         type: 'candlestick',
         data: filteredBase
       });
     } else {
       series.push({
-        name: 'Brecha %',
+        name: `Brecha % (${tfUpper})`,
         type: 'line',
         data: filteredBase
       });
@@ -373,7 +420,11 @@ document.addEventListener('DOMContentLoaded', () => {
           const h = w.globals.seriesCandleH[seriesIndex][dataPointIndex];
           const l = w.globals.seriesCandleL[seriesIndex][dataPointIndex];
           const c = w.globals.seriesCandleC[seriesIndex][dataPointIndex];
-          const date = new Date(w.globals.seriesX[seriesIndex][dataPointIndex]).toLocaleDateString();
+          
+          const dt = new Date(w.globals.seriesX[seriesIndex][dataPointIndex]);
+          const date = state.currentTimeframe === '1d'
+            ? dt.toLocaleDateString()
+            : `${dt.toLocaleDateString()} ${dt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
           
           if (o !== undefined) {
             return `
