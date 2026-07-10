@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>USDT/VES Rate Dashboard | Binance P2P vs BCV</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- ApexCharts CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Glassmorphic Background Objects -->
+    <div class="bg-glow circle-1"></div>
+    <div class="bg-glow circle-2"></div>
+
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="logo-area">
+        <span class="icon">📈</span>
+        <div>
+          <h1>Tasa Monitor</h1>
+          <p>Binance P2P vs BCV Oficial</p>
+        </div>
+      </div>
+      <div class="last-update" id="last-update-time">
+        Cargando datos...
+      </div>
+    </header>
+
+    <!-- Overview Cards -->
+    <section class="overview-grid">
+      <div class="metric-card" id="card-binance">
+        <div class="card-header">
+          <span>Binance P2P USDT/VES</span>
+          <span class="badge badge-binance">P2P</span>
+        </div>
+        <div class="card-body">
+          <h2 class="rate-value" id="binance-current">0.00</h2>
+          <p class="rate-sub">VES por USDT (Venta)</p>
+        </div>
+      </div>
+
+      <div class="metric-card" id="card-bcv">
+        <div class="card-header">
+          <span>Dólar BCV Oficial</span>
+          <span class="badge badge-bcv">BCV</span>
+        </div>
+        <div class="card-body">
+          <h2 class="rate-value" id="bcv-current">0.00</h2>
+          <p class="rate-sub">VES por USD (Banco Central)</p>
+        </div>
+      </div>
+
+      <div class="metric-card highlight-card" id="card-difference">
+        <div class="card-header">
+          <span>Brecha / Diferencial</span>
+          <span class="badge badge-diff">Spread</span>
+        </div>
+        <div class="card-body">
+          <h2 class="rate-value" id="pct-diff">0.00%</h2>
+          <p class="rate-sub" id="abs-diff">Diferencia: 0.00 VES</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Dashboard Workspace -->
+    <main class="dashboard-workspace">
+      
+      <!-- Control Panel -->
+      <section class="control-panel">
+        <h3>Controles y Parámetros</h3>
+        
+        <div class="control-group">
+          <label>Activo de Análisis</label>
+          <div class="btn-group" id="asset-selector">
+            <button class="active" data-value="binance">USDT Binance</button>
+            <button data-value="bcv">USD BCV</button>
+            <button data-value="spread">Brecha (%)</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label>Rango de Tiempo</label>
+          <div class="btn-group" id="range-selector">
+            <button data-value="7">7D</button>
+            <button data-value="15">15D</button>
+            <button class="active" data-value="30">30D</button>
+            <button data-value="all">Todo</button>
+          </div>
+        </div>
+
+        <div class="control-group indicators-group">
+          <label>Indicadores Técnicos</label>
+          
+          <div class="indicator-row">
+            <label class="switch">
+              <input type="checkbox" id="toggle-ma">
+              <span class="slider"></span>
+            </label>
+            <span>Media Móvil (MA)</span>
+            <input type="number" id="period-ma" value="7" min="2" max="50" class="period-input">
+          </div>
+
+          <div class="indicator-row">
+            <label class="switch">
+              <input type="checkbox" id="toggle-ema">
+              <span class="slider"></span>
+            </label>
+            <span>Media Móvil Exp (EMA)</span>
+            <input type="number" id="period-ema" value="9" min="2" max="50" class="period-input">
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart Panel -->
+      <section class="chart-panel">
+        <div class="chart-container">
+          <div id="main-chart"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Stats Table Section -->
+    <section class="stats-section">
+      <h3>Resumen Estadístico del Periodo</h3>
+      <div class="stats-grid">
+        <div class="stat-box">
+          <span class="stat-title">Máximo Binance</span>
+          <span class="stat-num" id="stat-max-binance">0.00 VES</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-title">Mínimo Binance</span>
+          <span class="stat-num" id="stat-min-binance">0.00 VES</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-title">Máximo BCV</span>
+          <span class="stat-num" id="stat-max-bcv">0.00 VES</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-title">Promedio Brecha</span>
+          <span class="stat-num text-highlight" id="stat-avg-spread">0.00%</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
