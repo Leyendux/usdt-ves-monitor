@@ -18,7 +18,7 @@ async function fetchBinanceP2P() {
     tradeType: 'BUY', // Merchants buying USDT (User selling USDT)
     merchantCheck: false,
     page: 1,
-    rows: 5,
+    rows: 20,
     payTypes: []
   };
 
@@ -41,19 +41,26 @@ async function fetchBinanceP2P() {
       throw new Error('Binance P2P returned empty or unsuccessful response.');
     }
 
-    // Get the top price
-    const topPrice = parseFloat(json.data[0].adv.price);
+    // Extract prices and sort them descending (highest price first, representing the best rate for the seller)
+    const prices = json.data.map(ad => parseFloat(ad.adv.price)).filter(p => !isNaN(p));
+    prices.sort((a, b) => b - a);
+
+    if (prices.length === 0) {
+      throw new Error('No valid prices found in advertisements.');
+    }
+
+    const bestPrice = prices[0];
     
-    // Average top 3 prices to avoid anomalies (if available)
+    // Average top 3 highest prices to avoid anomalies/scams
     let sum = 0;
-    const count = Math.min(json.data.length, 3);
+    const count = Math.min(prices.length, 3);
     for (let i = 0; i < count; i++) {
-      sum += parseFloat(json.data[i].adv.price);
+      sum += prices[i];
     }
     const avgPrice = sum / count;
 
-    console.log(`[Binance P2P] Top Price: ${topPrice} VES, Avg Top 3: ${avgPrice.toFixed(4)} VES`);
-    return topPrice; // Return topPrice as standard rate
+    console.log(`[Binance P2P] Best Price: ${bestPrice} VES, Avg Top 3 Highest: ${avgPrice.toFixed(4)} VES`);
+    return avgPrice; // Return the average of the top 3 highest prices as the standard rate
   } catch (error) {
     console.error('Error fetching Binance P2P:', error.message);
     return null;
