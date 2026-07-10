@@ -454,3 +454,26 @@ input:checked + .slider:before {
   color: #EF4444 !important;
 }
 
+/* Stats Container Layout */
+.stats-container-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .stats-container-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* General Colors */
+.text-high {
+  color: #10B981 !important;
+}
+
+.text-low {
+  color: #EF4444 !important;
+}
+
+

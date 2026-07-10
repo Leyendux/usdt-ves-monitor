@@ -136,25 +136,51 @@
       </section>
     </main>
 
-    <!-- Stats Table Section -->
-    <section class="stats-section">
-      <h3>Resumen Estadístico del Periodo</h3>
-      <div class="stats-grid">
-        <div class="stat-box">
-          <span class="stat-title">Máximo Binance</span>
-          <span class="stat-num" id="stat-max-binance">0.00 VES</span>
+    <!-- Stats Container Grid -->
+    <section class="stats-container-grid">
+      <!-- Today's Stats -->
+      <div class="stats-section">
+        <h3>Resumen de Hoy (Binance P2P)</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-title">Apertura (Open)</span>
+            <span class="stat-num" id="stat-today-open">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Máximo (High)</span>
+            <span class="stat-num text-high" id="stat-today-high">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Mínimo (Low)</span>
+            <span class="stat-num text-low" id="stat-today-low">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Último (Last)</span>
+            <span class="stat-num" id="stat-today-last">0.00 VES</span>
+          </div>
         </div>
-        <div class="stat-box">
-          <span class="stat-title">Mínimo Binance</span>
-          <span class="stat-num" id="stat-min-binance">0.00 VES</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-title">Máximo BCV</span>
-          <span class="stat-num" id="stat-max-bcv">0.00 VES</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-title">Promedio Brecha</span>
-          <span class="stat-num text-highlight" id="stat-avg-spread">0.00%</span>
+      </div>
+
+      <!-- Period Stats -->
+      <div class="stats-section">
+        <h3>Resumen del Periodo Seleccionado</h3>
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span class="stat-title">Máximo Binance</span>
+            <span class="stat-num" id="stat-max-binance">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Mínimo Binance</span>
+            <span class="stat-num" id="stat-min-binance">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Máximo BCV</span>
+            <span class="stat-num" id="stat-max-bcv">0.00 VES</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-title">Promedio Brecha</span>
+            <span class="stat-num text-highlight" id="stat-avg-spread">0.00%</span>
+          </div>
         </div>
       </div>
     </section>

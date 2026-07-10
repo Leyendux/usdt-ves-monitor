@@ -299,17 +299,45 @@ document.addEventListener('DOMContentLoaded', () => {
     const bcvData = filterDataByRange(state.dailyData.bcv, state.currentRange);
     const spreadData = filterDataByRange(state.dailyData.spread, state.currentRange);
 
-    if (binanceData.length === 0) return;
+    // Calculate Period Stats
+    if (binanceData.length > 0) {
+      const maxBinance = Math.max(...binanceData.map(d => d.y[1]));
+      const minBinance = Math.min(...binanceData.map(d => d.y[2]));
+      const maxBcv = Math.max(...bcvData.map(d => d.y[1]));
+      const avgSpread = spreadData.reduce((sum, d) => sum + d.y, 0) / spreadData.length;
 
-    const maxBinance = Math.max(...binanceData.map(d => d.y[1]));
-    const minBinance = Math.min(...binanceData.map(d => d.y[2]));
-    const maxBcv = Math.max(...bcvData.map(d => d.y[1]));
-    const avgSpread = spreadData.reduce((sum, d) => sum + d.y, 0) / spreadData.length;
+      elStatMaxBinance.textContent = `${maxBinance.toFixed(2)} VES`;
+      elStatMinBinance.textContent = `${minBinance.toFixed(2)} VES`;
+      elStatMaxBcv.textContent = `${maxBcv.toFixed(2)} VES`;
+      elStatAvgSpread.textContent = `${avgSpread.toFixed(2)}%`;
+    }
 
-    elStatMaxBinance.textContent = `${maxBinance.toFixed(2)} VES`;
-    elStatMinBinance.textContent = `${minBinance.toFixed(2)} VES`;
-    elStatMaxBcv.textContent = `${maxBcv.toFixed(2)} VES`;
-    elStatAvgSpread.textContent = `${avgSpread.toFixed(2)}%`;
+    // Calculate Today's Stats (Latest Day in raw history)
+    if (state.rawHistory.length > 0) {
+      const groups = {};
+      state.rawHistory.forEach(item => {
+        const dateStr = item.timestamp.split('T')[0];
+        if (!groups[dateStr]) groups[dateStr] = [];
+        groups[dateStr].push(item);
+      });
+      
+      const dates = Object.keys(groups).sort();
+      if (dates.length > 0) {
+        const latestDate = dates[dates.length - 1];
+        const todayItems = groups[latestDate].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        const todayBinance = todayItems.map(d => d.binance);
+        
+        const open = todayBinance[0];
+        const high = Math.max(...todayBinance);
+        const low = Math.min(...todayBinance);
+        const last = todayBinance[todayBinance.length - 1];
+        
+        document.getElementById('stat-today-open').textContent = `${open.toFixed(2)} VES`;
+        document.getElementById('stat-today-high').textContent = `${high.toFixed(2)} VES`;
+        document.getElementById('stat-today-low').textContent = `${low.toFixed(2)} VES`;
+        document.getElementById('stat-today-last').textContent = `${last.toFixed(2)} VES`;
+      }
+    }
   }
 
   // Create or Update ApexChart
