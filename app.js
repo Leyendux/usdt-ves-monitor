@@ -44,6 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
   async function init() {
     setupEventListeners();
     await loadData();
+    // Auto-update every 60 seconds
+    setInterval(loadData, 60000);
   }
 
   // Setup UI Listeners
@@ -500,11 +502,14 @@ document.addEventListener('DOMContentLoaded', () => {
       colors: isCandle ? ['#fff', '#3B82F6', '#EC4899'] : ['#3B82F6', '#F59E0B', '#EF4444']
     };
 
-    if (state.chart) {
-      state.chart.destroy();
+    if (state.chart && state.chart.opts.chart.type === (isCandle ? 'candlestick' : 'line')) {
+      state.chart.updateOptions(options, false, true, true);
+    } else {
+      if (state.chart) {
+        state.chart.destroy();
+      }
+      state.chart = new ApexCharts(document.querySelector("#main-chart"), options);
+      state.chart.render();
     }
-    
-    state.chart = new ApexCharts(document.querySelector("#main-chart"), options);
-    state.chart.render();
   }
 });
