@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fetch JSON and process
   async function loadData() {
     try {
-      const response = await fetch('data/rates-history.json');
+      const response = await fetch('data/rates-history.json?t=' + Date.now());
       if (!response.ok) throw new Error('No se pudo cargar el archivo de datos.');
       const data = await response.json();
       
