@@ -476,4 +476,27 @@ input:checked + .slider:before {
   color: #EF4444 !important;
 }
 
-
+/* Mobile Responsiveness */
+@media (max-width: 640px) {
+  .app-container {
+    padding: 1rem;
+  }
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .last-update {
+    align-self: flex-start;
+  }
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  .chart-panel {
+    padding: 1rem;
+    min-height: 400px;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

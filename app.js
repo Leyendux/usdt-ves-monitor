@@ -346,16 +346,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let title = '';
     let isCandle = true;
     let colors = [];
+    
+    const isCandleTimeframe = state.currentTimeframe !== '1h';
 
     if (state.currentAsset === 'binance') {
       baseData = state.dailyData.binance;
       title = 'Tasas USDT Binance P2P';
-      isCandle = true;
+      isCandle = isCandleTimeframe;
       colors = ['#F3BA2F'];
     } else if (state.currentAsset === 'bcv') {
       baseData = state.dailyData.bcv;
       title = 'Tasas Dólar BCV Oficial';
-      isCandle = true;
+      isCandle = isCandleTimeframe;
       colors = ['#10B981'];
     } else {
       baseData = state.dailyData.spread;
@@ -364,7 +366,16 @@ document.addEventListener('DOMContentLoaded', () => {
       colors = ['#3B82F6'];
     }
 
-    const filteredBase = filterDataByRange(baseData, state.currentRange);
+    let filteredBase = filterDataByRange(baseData, state.currentRange);
+    
+    // If it's a line chart but the data has OHLC arrays, map them to Close values
+    if (!isCandle && filteredBase.length > 0 && Array.isArray(filteredBase[0].y)) {
+      filteredBase = filteredBase.map(item => ({
+        x: item.x,
+        y: item.y[3] // Close value
+      }));
+    }
+
     const series = [];
 
     const tfUpper = state.currentTimeframe.toUpperCase();
@@ -376,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     } else {
       series.push({
-        name: `Brecha % (${tfUpper})`,
+        name: state.currentAsset === 'spread' ? `Brecha % (${tfUpper})` : `Tasa (${tfUpper})`,
         type: 'line',
         data: filteredBase
       });
@@ -430,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
       yaxis: {
         tooltip: { enabled: true },
         labels: {
-          formatter: (value) => isCandle ? `${value.toFixed(2)} VES` : `${value.toFixed(2)}%`,
+          formatter: (value) => state.currentAsset === 'spread' ? `${value.toFixed(2)}%` : `${value.toFixed(2)} VES`,
           style: { colors: '#9ca3af' }
         }
       },
