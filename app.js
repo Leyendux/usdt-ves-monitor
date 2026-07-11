@@ -159,12 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const dateStr = item.timestamp.split('T')[0];
         const hour = date.getHours();
         const block = Math.floor(hour / 4) * 4;
-        groupKey = `${dateStr}_${block}h`;
+        groupKey = `${dateStr}_${String(block).padStart(2, '0')}h`;
       } else {
         // '1h'
         const dateStr = item.timestamp.split('T')[0];
         const hour = date.getHours();
-        groupKey = `${dateStr}_${hour}h`;
+        groupKey = `${dateStr}_${String(hour).padStart(2, '0')}h`;
       }
 
       if (!groups[groupKey]) {
